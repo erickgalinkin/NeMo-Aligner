@@ -166,6 +166,15 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
     def get_loss_and_metrics(self, batch, forward_only):
         sequence_length = batch["response_tokens"].size(-1)
 
+        if not forward_only:
+            sequence_length += 128 - (sequence_length % 128)
+            response_tokens = batch["response_tokens"]
+            sequence_length = min(sequence_length, self.cfg.encoder_seq_length)
+
+            batch["response_tokens"] = torch.nn.functional.pad(
+                response_tokens, (0, sequence_length - response_tokens.size(-1)), value=self.tokenizer.eos_id
+            )
+
         data_iter = get_iterator_k_split(batch, get_num_microbatches())
         set_sync_funcs(self, forward_only)
         fwd_bwd_function = get_forward_backward_func()
@@ -281,6 +290,8 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
             max_generation_length=self._length_params["max_length"],
             max_sequence_length=self.cfg.encoder_seq_length,
         )
+
+        response_tokens = response_tokens[:, : response_lengths.max()].clone()
 
         # TODO(geshen): get nemo generate to return the unaltered log probs
         log_probs = self.get_inference_log_probs(response_tokens)

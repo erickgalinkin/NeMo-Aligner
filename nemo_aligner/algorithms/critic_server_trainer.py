@@ -110,11 +110,13 @@ class CriticServerTrainer:
     @batch
     @lock_method("self.lock")
     def server_save(self, **inputs: np.ndarray) -> Dict[str, np.ndarray]:
+        dummy_vars = inputs.pop("dummy_var", None)
+
         # tell other ranks to start inference
         choice = ServerSignal.SAVE.cuda()
         torch.distributed.broadcast(choice, 0)
         self.save()
-        return {"status": np.array((0,), dtype=np.int32)}
+        return {"status": np.repeat(np.array((0,), dtype=np.int32), dummy_vars.shape[0])}
 
     @batch
     @lock_method("self.lock")
@@ -124,6 +126,7 @@ class CriticServerTrainer:
         prev_values = inputs.pop("prev_values", None)
         mask = inputs.pop("mask", None)
 
+        batch_size = mask.shape[0]
         # we should pad to GBS
         tokens, extra_tokens = pad_input(tokens, self.gbs)
         returns, extra_returns = pad_input(returns, self.gbs)
@@ -148,7 +151,7 @@ class CriticServerTrainer:
         torch.distributed.broadcast(choice, 0)
 
         loss_mean = self.run_training(**batch)
-        return {"loss_mean": np.array((loss_mean,))}
+        return {"loss_mean": np.repeat(np.array((loss_mean,)), batch_size)}
 
     def run_server(self):
         if torch.distributed.get_rank() == 0:
