@@ -122,6 +122,9 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
                 if self.entropy_bonus > 0:
                     scaled_entropy = calculate_distributed_entropy(parallel_logits, mask) * self.entropy_bonus
 
+                unpadded_s = prev_log_probs.size(-1)
+                curr_log_probs = curr_log_probs[:, :unpadded_s]
+
                 # Calculate clipped PPO surrogate loss function.
                 ratios = (curr_log_probs - prev_log_probs).exp()
                 ratios_clamped = ratios.clamp(1.0 - self.ratio_eps, 1.0 + self.ratio_eps)
