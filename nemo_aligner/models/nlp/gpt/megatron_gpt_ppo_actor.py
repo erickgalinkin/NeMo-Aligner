@@ -273,6 +273,7 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
         self._reset_sequence_parallelism_args()
         set_eval(self)
         self.offload_adam_states()
+        set_sync_funcs(self, forward_only=True)
 
     @torch.no_grad()
     def infer(self, inference_batch):
