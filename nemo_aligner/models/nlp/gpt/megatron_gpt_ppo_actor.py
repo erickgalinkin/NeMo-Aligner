@@ -312,9 +312,9 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
         if self.use_trtllm_generation:
             # want to move it here so we can do the transposing on GPU
             # and then move to cpu
-            self.force_move_model_to_cpu()
-            clear_memory()
             self.trtllm_generate.refit(self.model)
+            clear_memory()
+            self.force_move_model_to_cpu()
 
     @torch.no_grad()
     def infer(self, inference_batch):
@@ -401,12 +401,12 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
 
         if self.to_offload_adam_states and self.distributed_adam_offload_manager is None:
 
-            for v in self._optimizer._grad_buffers.values():
-                v.data = v.data.to("cpu", non_blocking=True)
+            # for v in self._optimizer._grad_buffers.values():
+            #     v.data = v.data.to("cpu", non_blocking=True)
             
             # reference cycles? have to call it here idk why
-            if len(self._optimizer._grad_buffers.values()) > 0:
-                self._optimizer.zero_grad(set_to_none=True)
+            # if len(self._optimizer._grad_buffers.values()) > 0:
+            #     self._optimizer.zero_grad(set_to_none=True)
 
             self.distributed_adam_offload_manager = offload_distributed_adam(self._optimizer.state_dict(state_dict_format=1, gather_on_root=False))
             # offload onto cpu
@@ -414,8 +414,8 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
 
     def onload_adam_states(self):
         if self.distributed_adam_offload_manager is not None:
-            for v in self._optimizer._grad_buffers.values():
-                v.data = v.data.to(device=torch.cuda.current_device(), non_blocking=True)
+            # for v in self._optimizer._grad_buffers.values():
+            #     v.data = v.data.to(device=torch.cuda.current_device(), non_blocking=True)
 
             # load back onto GPU
             self.distributed_adam_offload_manager.__exit__(None, None, None)
