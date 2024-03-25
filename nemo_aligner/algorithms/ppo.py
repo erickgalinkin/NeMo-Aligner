@@ -362,38 +362,25 @@ class PPOTrainer:
         futures = []
         timer_metrics = {}
 
-        self.timer.start("rollout_init")
-        ids = [item[1]["idx"] for item in zip(range(num_microbatches), dataloader_iter)]
-        local_ids = set(itertools.chain.from_iterable(ids))
-        global_ids = get_global_set(local_ids)
+        # self.timer.start("rollout_init")
+        # local_ids = set(itertools.chain.from_iterable(ids))
+        # global_ids = get_global_set(local_ids)
 
-        if torch.distributed.get_rank() == 0:
-            set_idx(global_ids)
+        # if torch.distributed.get_rank() == 0:
+        # set_idx(global_ids)
 
-        torch.distributed.barrier()
-        timer_metrics["rollout_init"] = self.timer.stop_and_get_time("rollout_init")
+        # torch.distributed.barrier()
+        # timer_metrics["rollout_init"] = self.timer.stop_and_get_time("rollout_init")
 
-        self.timer.start("first_request")
-        idx = send_request(host=self.host, port=self.port, use_trtllm_reshard=self.use_trtllm_reshard)
-        timer_metrics["first_request"] = self.timer.stop_and_get_time("first_request")
-
+        # self.timer.start("first_request")
+        # idx = send_request(host=self.host, port=self.port, use_trtllm_reshard=self.use_trtllm_reshard)
+        # timer_metrics["first_request"] = self.timer.stop_and_get_time("first_request")
         self.timer.start("generate")
-        while len(idx) > 0:
-            idx = idx[0]
-            batch = dataloader_iter._dataset[idx]
-            batch = collate_with_pad_to_max_batch(
-                self.model.cfg.ppo.length_params.max_length, self.model.tokenizer.eos_id, self.model.cfg
-            )([batch])
-
+        for batch in dataloader_iter:
             rollout_batch = self.model.infer(batch)
             rollout_batches.append(rollout_batch)
 
             futures.append(self.rm_critic.infer_rm_critic(rollout_batch, use_trtllm_reshard=self.use_trtllm_reshard))
-
-            start_time = time.time()
-            idx = send_request(host=self.host, port=self.port, use_trtllm_reshard=self.use_trtllm_reshard)
-            end_time = time.time()
-            print("### REQUEST TOOK", end_time - start_time)
 
         timer_metrics["generate"] = self.timer.stop_and_get_time("generate")
 

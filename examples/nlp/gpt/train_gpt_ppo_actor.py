@@ -174,19 +174,8 @@ def main(cfg) -> None:
         ppo_trainer.load_state_dict(custom_trainer_state_dict)
 
     # rank 0 setup flask server
-    flask_host = cfg.trainer.ppo.host
-    flask_port = cfg.trainer.ppo.port
-
-    if torch.distributed.get_rank() == 0:
-        app = Flask(__name__)
-
-        @app.route("/get_idx", methods=["PUT"])
-        def get_http_idx():
-            return get_idx()
-
-        set_lock(threading.Lock())
-
-        threading.Thread(target=lambda: app.run(host=flask_host, port=flask_port, use_reloader=False)).start()
+    # flask_host = cfg.trainer.ppo.host
+    # flask_port = cfg.trainer.ppo.port
 
     ppo_trainer.fit()
 
