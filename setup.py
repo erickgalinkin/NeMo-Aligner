@@ -71,12 +71,15 @@ def req_file(filename, folder="requirements"):
     return [x.strip() for x in content if x.strip()]
 
 
-install_requires = req_file("requirements.txt", folder="")
+extras_require = {
+    'nemo': req_file("nemo_requirements.txt"),
+    'nonemo': req_file("other_requirements.txt"),
+}
 
-extras_require = {}
+# since nemo doesn't pip install properly, we have to only install non-nemo deps
+install_requires = extras_require['nonemo']
 
-
-###############################################################################
+##############################################################################
 #                            Code style checkers                              #
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
 
