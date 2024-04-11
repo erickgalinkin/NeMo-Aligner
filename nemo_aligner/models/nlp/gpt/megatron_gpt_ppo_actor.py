@@ -321,8 +321,8 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
 
         if self.use_trtllm_generation:
             actor_output = self.trtllm_generate.generate(inputs)
-            response_tokens = actor_output['response_tokens']
-            response_lengths = actor_output['response_lengths']
+            response_tokens = actor_output["response_tokens"]
+            response_lengths = actor_output["response_lengths"]
         else:
             strategy = TrackLengthGPTModelTextGenerationStrategy(
                 model=self, context_lengths=prompt_lengths, max_length=self._length_params["max_length"]
@@ -336,15 +336,13 @@ class MegatronGPTActorModel(MegatronGPTModel, AlignableGenerativeInterface):
             )
 
             response_tokens = torch.cuda.LongTensor(actor_output["token_ids"])
-            response_lengths = (
-                calculate_dialogue_response_lengths(
-                    tokens=response_tokens,
-                    prompt_lengths=prompt_lengths,
-                    tokenizer=self.tokenizer,
-                    end_strings=self._sampling_params["end_strings"],
-                    max_generation_length=self._length_params["max_length"],
-                    max_sequence_length=self.cfg.encoder_seq_length,
-                )
+            response_lengths = calculate_dialogue_response_lengths(
+                tokens=response_tokens,
+                prompt_lengths=prompt_lengths,
+                tokenizer=self.tokenizer,
+                end_strings=self._sampling_params["end_strings"],
+                max_generation_length=self._length_params["max_length"],
+                max_sequence_length=self.cfg.encoder_seq_length,
             )
             strategy.get_lengths()
             max_response_length = response_lengths.max().item()
