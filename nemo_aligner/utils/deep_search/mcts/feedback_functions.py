@@ -8,6 +8,7 @@ from nemo_skills.code_execution.math_grader import extract_answer
 from nemo_skills.code_execution.sandbox import LocalSandbox
 
 from nemo_aligner.utils.deep_search.mcts.reward_functions import get_reward, get_helpfulness_reward, get_harmfulness_reward
+from nemo_aligner.utils.ngc_llm_inference import connect_llm_service, run_inference
 
 
 def sigmoid(x):
@@ -191,21 +192,19 @@ class HelpfulnessFeedback(Feedback):
 
 class HarmfulnessFeedback(Feedback):
     def __init__(self):
-        self.host = os.getenv("HARMFUL_REWARD_SERVER_HOST", "localhost")
-        self.port = os.getenv("HARMFUL_REWARD_SERVER_PORT", "1425")
+        ngc_api_key = os.environ.get("NGC_API_KEY")
+        ngc_org_id = os.environ.get("NGC_ORG_ID")
+        customization_id = os.environ.get("NGC_CUSTOMIZATION_ID")
+        self.conn = connect_llm_service(ngc_api_key=ngc_api_key, org_id=ngc_org_id)
+        self.run_inference = run_inference
+        self.customization_id = customization_id
 
     def score(self, response, data_id=None):
         """
         score the response
         """
-        # remove the trailing extra_id_1
-        if response.endswith("<extra_id_1>"):
-            response = response[: -len("<extra_id_1>")]
-        # remove the <extra_id_2> line
-        response = "\n".join([i for i in response.split("\n") if not i.startswith("<extra_id_2>")])
         try:
-            evaluate = get_harmfulness_reward([response], False, self.host, self.port)[0]
-            score = sigmoid(evaluate[0])
+            score = run_inference(conn_obj=self.conn, prompt=response, customization_id=self.customization_id)
         except Exception as e:
             print("############ Inference failed ############")
             print(e)
