@@ -58,6 +58,56 @@ def get_reward(
     return outputs
 
 
+def get_helpfulness_reward(
+    sentences: List[str], add_EOS=False, host="localhost", port=1424, model_name="reward_model",
+):
+    sentences = _str_list2numpy(sentences)
+
+    futures = []
+
+    with FuturesModelClient(f"{host}:{port}", model_name) as client:
+        for sen in np.split(sentences, sentences.shape[0]):
+            add_EOS_arr = np.ones_like(sen, dtype=bool) * add_EOS
+            future = client.infer_batch(sentences=sen, add_EOS=add_EOS_arr)
+            futures.append(future)
+
+    all_result_dicts = [f.result() for f in futures]
+
+    all_rewards, all_exceeded = [], []
+
+    for output_dict in all_result_dicts:
+        reward_out = output_dict["rewards"].flatten().tolist()
+        all_rewards.append(reward_out)
+        all_exceeded += output_dict["exceeded"].tolist()
+
+    return all_rewards
+
+
+def get_harmfulness_reward(
+    sentences: List[str], add_EOS=False, host="localhost", port=1425, model_name="reward_model",
+):
+    sentences = _str_list2numpy(sentences)
+
+    futures = []
+
+    with FuturesModelClient(f"{host}:{port}", model_name) as client:
+        for sen in np.split(sentences, sentences.shape[0]):
+            add_EOS_arr = np.ones_like(sen, dtype=bool) * add_EOS
+            future = client.infer_batch(sentences=sen, add_EOS=add_EOS_arr)
+            futures.append(future)
+
+    all_result_dicts = [f.result() for f in futures]
+
+    all_rewards, all_exceeded = [], []
+
+    for output_dict in all_result_dicts:
+        reward_out = output_dict["rewards"].flatten().tolist()
+        all_rewards.append(reward_out)
+        all_exceeded += output_dict["exceeded"].tolist()
+
+    return all_rewards
+
+
 if __name__ == "__main__":
     prompt = """<extra_id_0>System
 A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.
