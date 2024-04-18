@@ -2,11 +2,16 @@ import os
 import re
 
 import pandas as pd
+import numpy as np
 from datasets import load_dataset
 from nemo_skills.code_execution.math_grader import extract_answer
 from nemo_skills.code_execution.sandbox import LocalSandbox
 
-from nemo_aligner.utils.deep_search.mcts.reward_functions import get_reward
+from nemo_aligner.utils.deep_search.mcts.reward_functions import get_reward, get_helpfulness_reward, get_harmfulness_reward
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 
 class Feedback(object):
@@ -157,3 +162,70 @@ class GSK8KFeedbackHF(Feedback):
             return 1.0
         else:
             return 0.0
+
+
+class HelpfulnessFeedback(Feedback):
+    def __init__(self):
+        # local_rank = os.getenv("local_rank", "0")
+        self.host = os.getenv("HELPFUL_REWARD_SERVER_HOST", "localhost")
+        self.port = os.getenv("HELPFUL_REWARD_SERVER_PORT", "1424")
+
+    def score(self, response, data_id=None):
+        """
+        score the response
+        """
+        # remove the trailing extra_id_1
+        if response.endswith("<extra_id_1>"):
+            response = response[: -len("<extra_id_1>")]
+        # remove the <extra_id_2> line
+        response = "\n".join([i for i in response.split("\n") if not i.startswith("<extra_id_2>")])
+        try:
+            evaluate = get_helpfulness_reward([response], False, self.host, self.port)[0]
+            score = sigmoid(evaluate[0])
+        except Exception as e:
+            print("############ Inference failed ############")
+            print(e)
+            score = 0.0
+        finally:
+            return score
+
+
+class HarmfulnessFeedback(Feedback):
+    def __init__(self):
+        self.host = os.getenv("HARMFUL_REWARD_SERVER_HOST", "localhost")
+        self.port = os.getenv("HARMFUL_REWARD_SERVER_PORT", "1425")
+
+    def score(self, response, data_id=None):
+        """
+        score the response
+        """
+        # remove the trailing extra_id_1
+        if response.endswith("<extra_id_1>"):
+            response = response[: -len("<extra_id_1>")]
+        # remove the <extra_id_2> line
+        response = "\n".join([i for i in response.split("\n") if not i.startswith("<extra_id_2>")])
+        try:
+            evaluate = get_harmfulness_reward([response], False, self.host, self.port)[0]
+            score = sigmoid(evaluate[0])
+        except Exception as e:
+            print("############ Inference failed ############")
+            print(e)
+            score = 0.0
+        finally:
+            return score
+
+
+class JailbreakFeedback(Feedback):
+    def __init__(self):
+        super().__init__()
+        self.helpful = HelpfulnessFeedback()
+        self.harmful = HarmfulnessFeedback()
+
+    def score(self, response, data_id=None):
+        """
+        score the response
+        """
+        helpful_score = self.helpful.score(response)
+        harmful_score = self.harmful.score(response)
+        overall_score = helpful_score - harmful_score
+        return overall_score
