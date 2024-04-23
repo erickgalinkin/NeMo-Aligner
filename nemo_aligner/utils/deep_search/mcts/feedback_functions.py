@@ -7,7 +7,7 @@ from datasets import load_dataset
 from nemo_skills.code_execution.math_grader import extract_answer
 from nemo_skills.code_execution.sandbox import LocalSandbox
 
-from nemo_aligner.utils.deep_search.mcts.reward_functions import get_reward, get_helpfulness_reward, get_harmfulness_reward
+from nemo_aligner.utils.deep_search.mcts.reward_functions import get_reward, get_helpfulness_reward
 from nemo_aligner.utils.ngc_llm_inference import connect_llm_service, run_inference
 
 
