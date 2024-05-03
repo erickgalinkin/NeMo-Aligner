@@ -40,7 +40,6 @@ from nemo.utils import logging
 from nemo.utils.exp_manager import exp_manager
 from nemo.utils.timers import NamedTimer
 from nemo_aligner.models.nlp.gpt.megatron_gpt_hybrid_model import MegatronGPTHybridModel
-from nemo_aligner.utils.deep_search.mcts.feedback_functions import DummyScore, GSK8KFeedbackDataset, SteerLMFeedback
 from nemo_aligner.utils.deep_search.mcts.feedback_functions import (
     DummyScore,
     GSK8KFeedbackDataset,
