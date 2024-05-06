@@ -379,7 +379,7 @@ def start_worker(search_func, collate_func, save_path, ds, cfg, url, backend_url
         def search_for_batch(self, job):
             try:
                 beg_time = time.time()
-                # job exmaple [(0, 0), (0, 1), (1, 0), (1, 1)], list of (batch_idx, replica_idx)
+                # job example [(0, 0), (0, 1), (1, 0), (1, 1)], list of (batch_idx, replica_idx)
                 job = torch.tensor(job)
                 job = broadcast_2d_tensor(job, 0, None, dtype=torch.int64)
                 batch_idx = job[:, 0].tolist()
