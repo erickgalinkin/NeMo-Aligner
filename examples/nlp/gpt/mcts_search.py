@@ -102,8 +102,9 @@ def collate_func(batch):
 
     for b in batch:
         new_dict["question"].append(b["question"])
-        new_dict["answer"].append(b["answer"])
         new_dict["data_id"].append(b["data_id"])
+        if "answer" in b.keys():
+            new_dict["answer"].append(b["answer"])
 
     return new_dict
 
