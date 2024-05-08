@@ -66,7 +66,9 @@ model:
     kv_cache_in_cpu: True #  save kv cache in cpu memory
 
     environment: null  # the environment for MCTS to interact with, default None, can be set to "code" for running code
-    feedback: jailbreak # the feedback function used for the search, ['math', 'steerlm']
+    feedback: jailbreak # the feedback function used for the search, ['math', 'steerlm', 'jailbreak']
+
+    child_threshold: 0.01 # the probability threshold for the child nodes to be expanded
 
     turn_off_kv_cache: False # turn off the kv cache for inference
 
