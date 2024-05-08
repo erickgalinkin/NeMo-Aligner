@@ -46,6 +46,8 @@ from nemo_aligner.utils.deep_search.mcts.feedback_functions import (
     GSK8KFeedbackHF,
     SteerLMFeedback,
     JailbreakFeedback
+)
+from nemo_aligner.utils.deep_search.mcts.run import run_mcts
 from nemo_aligner.utils.distributed import broadcast_2d_tensor
 from nemo_aligner.utils.train_script_utils import CustomLoggerWrapper, init_distributed, resolve_and_create_trainer
 from nemo_aligner.utils.utils import load_and_override_model_config, load_from_nemo, preemptable_save
