@@ -45,7 +45,8 @@ from nemo_aligner.utils.deep_search.mcts.feedback_functions import (
     GSK8KFeedbackDataset,
     GSK8KFeedbackHF,
     SteerLMFeedback,
-    JailbreakFeedback
+    JailbreakFeedback,
+    SteerLMJailbreakFeedback
 )
 from nemo_aligner.utils.deep_search.mcts.run import run_mcts
 from nemo_aligner.utils.distributed import broadcast_2d_tensor
@@ -286,6 +287,8 @@ def get_dataset(cfg):
         score_fn = DummyScore()
     elif cfg.model.mcts.feedback == "jailbreak":
         score_fn = JailbreakFeedback()
+    elif cfg.model.mcts.feedback == "steerlm_jailbreak":
+        score_fn = SteerLMJailbreakFeedback()
     else:
         raise ValueError(f"Invalid feedback function {cfg.model.mcts.feedback}")
     return train_ds, score_fn
