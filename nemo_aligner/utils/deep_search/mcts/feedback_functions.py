@@ -258,7 +258,6 @@ class SteerLMJailbreakFeedback(Feedback):
         numbers = [int(attr.split(":")[-1]) for attr in attributes]
         # remove the <extra_id_2> line
         response = "\n".join([i for i in response.split("\n") if not i.startswith("<extra_id_2>")])
-        response = response + "<extra_id_2>"
 
         helpful_score = self.helpful.score(response)
         harmful_score = self.harmful.score(response)
