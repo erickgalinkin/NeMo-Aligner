@@ -356,11 +356,7 @@ class MCTSParallel:
                     text, spg.data_id, depth, all_tokens
                 )
 
-                print(f"value: {value}\n"
-                      f"is_terminal: {is_terminal}\n"
-                      f"ends_properly: {ends_properly}")
                 if is_terminal:
-                    print("Is terminal")
                     if not self.args["oracle"]:
                         # if no oracle, then we need to run value inference to get the value
 
@@ -388,7 +384,6 @@ class MCTSParallel:
                         spg.value_memory.add((tuple(node.get_all_tokens()), value, node))
 
                 else:
-                    print("Not terminal")
                     # if not terminal, then expand the node in the later part of the code
                     # spg.node is a dictory
                     spg.node = {
@@ -416,7 +411,6 @@ class MCTSParallel:
                     value = [None] * len(policy)
 
             for i, mappingIdx in enumerate(expandable_search):
-                print("Expanding nodes")
                 # node to expand
                 result_dict = ps[mappingIdx].node
                 node = result_dict["node"]
@@ -543,7 +537,6 @@ class DeepSearch:
                 backup_root_nodes = [spg.root for spg in parallel_searches]
             # loop from large to small so that we can remove search instances as we go
             for i in range(len(parallel_searches))[::-1]:
-                print(f"Search loop iteration {i}")
                 spg = parallel_searches[i]
                 action_size = self.top_k
                 action_probs = np.zeros(action_size, dtype=np.float32)
@@ -597,7 +590,6 @@ class DeepSearch:
                 )
 
                 if is_terminal:
-                    print("Is terminal!")
                     if self.inference_only:
                         # if inference only, we only collect the best tokens from the inference
                         all_tokens = tuple(spg.state)
@@ -615,7 +607,6 @@ class DeepSearch:
                                 "context": self.mcts.decode_text(backup_root_states[i]),
                             }
                         )
-                        print("Appended to return memory")
                         # need to clean up the mcts cache starting from backup root states
                         backup_root_node = backup_root_nodes[i]
                         assert tuple(backup_root_states[i]) == tuple(backup_root_nodes[i].state)
@@ -630,7 +621,6 @@ class DeepSearch:
                     # collects the value buffer if the response ends properly with <extra_id> or byte token
                     # or if the response has the answer inside it
                     if ends_properly or has_answer:
-                        print("Ends properly!")
                         # only collect the memory if it ends properly
                         for tokens, hist_action_probs, actions in spg.memory:
                             hist_outcome = value
@@ -647,7 +637,6 @@ class DeepSearch:
                             )
 
                     # process the value memory to get the value for each of the tokens
-                    print("Processing value memory...")
                     value_mems = []
                     for tokens, value, node in spg.value_memory:
                         all_values = []
@@ -701,5 +690,4 @@ class DeepSearch:
                 print(f"### SAVING CACHE TOOK {save_end - save_beg} SECONDS")
                 self.save_flag = False
 
-        print("Returning...")
         return return_memory, return_value_memory

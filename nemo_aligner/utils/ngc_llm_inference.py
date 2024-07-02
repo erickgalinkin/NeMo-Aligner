@@ -1,9 +1,4 @@
 """ File that performs inference using the Nemo LLM variant models """
-import os
-
-from datasets import load_dataset
-from pprint import pprint
-
 from nemollm.api import NemoLLM
 
 UNSAFE_CATS = ['Profanity', 'Violence', 'Guns and Illegal Weapons', 'Criminal Planning/Confessions',
@@ -77,7 +72,6 @@ def get_response_from_service(conn, formatted_prompt, customization_id=""):
 
 def format_text_for_nemo_lora_toxic(text):
     """ Format the string the format expected by the model """
-    print("Input to format:", text)
     sys_prompt = "\"You are a content moderation and classification agent. Your job is to classify the text into the following categories : `Safe` of `Unsafe`. If the text is classified as Unsafe, make sure to categorize which unsafe category the text is from the list of unsafe categories : `Profanity`, `Violence`, `Guns and Illegal Weapons`,`Criminal Planning/Confessions`, `Hate/Identity Hate`, `Sexual`, `Suicide and Self Harm`, `PII/Privacy`, `Threat`, `Sexual (minor)`, `Controlled and Regulated Substance`, `Harassment`. If the text cannot be classified as either `safe` or `unsafe`, then output `Needs Caution`\n\n\"\["
 
     text_formatted = "\{\"role\": \"user\", \"content\":\""
@@ -94,7 +88,6 @@ def run_inference(conn_obj, prompt, customization_id):
 
     prompt = format_text_for_nemo_lora_toxic(prompt)
     response = get_response_from_service(conn_obj, prompt, customization_id)
-    print(f"Response from NGC: {response}")
     pred = response["text"]
     if any([cat.lower() in pred.lower() for cat in UNSAFE_CATS]):
         return 1

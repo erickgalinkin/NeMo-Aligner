@@ -192,7 +192,6 @@ class HelpfulnessFeedback(Feedback):
             print(e)
             score = 0.0
         finally:
-            print(f"Helpfulness score: {score}")
             return score
 
 
@@ -217,7 +216,6 @@ class HarmfulnessFeedback(Feedback):
             print(e)
             score = 0.0
         finally:
-            print(f"Harmfulness score: {score}")
             return score
 
 
