@@ -212,9 +212,11 @@ class MCTSParallel:
         return text
 
     def get_value_and_terminated(self, text, data_id, depth, tokens):
+        print("Checking for termination")
         terminate = False
         for fun in self.terminate_fns:
             if fun(text, depth, tokens):
+                print("Terminate true")
                 terminate = True
                 break
 
@@ -537,6 +539,7 @@ class DeepSearch:
                 backup_root_nodes = [spg.root for spg in parallel_searches]
             # loop from large to small so that we can remove search instances as we go
             for i in range(len(parallel_searches))[::-1]:
+                print(f"Search loop iteration {i}")
                 spg = parallel_searches[i]
                 action_size = self.top_k
                 action_probs = np.zeros(action_size, dtype=np.float32)
