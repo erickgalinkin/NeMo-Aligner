@@ -359,6 +359,7 @@ class MCTSParallel:
                 )
 
                 if is_terminal:
+                    print("Is terminal")
                     if not self.args["oracle"]:
                         # if no oracle, then we need to run value inference to get the value
 
@@ -413,6 +414,7 @@ class MCTSParallel:
                     value = [None] * len(policy)
 
             for i, mappingIdx in enumerate(expandable_search):
+                print("Expanding nodes")
                 # node to expand
                 result_dict = ps[mappingIdx].node
                 node = result_dict["node"]
