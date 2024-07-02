@@ -200,7 +200,8 @@ class HarmfulnessFeedback(Feedback):
     def __init__(self):
         ngc_api_key = os.environ.get("NGC_API_KEY")
         ngc_org_id = os.environ.get("NGC_ORG_ID")
-        customization_id = os.environ.get("NGC_CUSTOMIZATION_ID")
+        # customization_id = os.environ.get("NGC_CUSTOMIZATION_ID")
+        customization_id = ""
         self.conn = connect_llm_service(ngc_api_key=ngc_api_key, org_id=ngc_org_id)
         self.run_inference = run_inference
         self.customization_id = customization_id

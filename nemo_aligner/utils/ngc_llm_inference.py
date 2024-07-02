@@ -36,7 +36,7 @@ def connect_llm_service(ngc_api_key, org_id):
     return conn
 
 
-def get_response_from_service(conn, formatted_prompt, customization_id):
+def get_response_from_service(conn, formatted_prompt, customization_id=""):
     """
     Send request to Nemo LLM service invoking the model to run inference and return the response
     """
