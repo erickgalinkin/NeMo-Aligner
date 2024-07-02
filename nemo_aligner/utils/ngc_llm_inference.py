@@ -40,45 +40,38 @@ def get_response_from_service(conn, formatted_prompt, customization_id=""):
     """
     Send request to Nemo LLM service invoking the model to run inference and return the response
     """
-    response = None
     # In case the service throws an error, we keep retying until we get a response
-    while True:
-        try:
-            if customization_id:
-                response = conn.generate(
-                    prompt=formatted_prompt,
-                    model="gpt-43b-002-lora",
-                    customization_id=customization_id,
-                    tokens_to_generate=128,
-                    temperature=0.5,
-                    top_k=1,
-                    top_p=0.9,
-                    random_seed=0,
-                    beam_search_diversity_rate=0.0,
-                    beam_width=1,
-                    repetition_penalty=1.0,
-                    length_penalty=1.0,
+    if customization_id:
+        response = conn.generate(
+            prompt=formatted_prompt,
+            model="gpt-43b-002-lora",
+            customization_id=customization_id,
+            tokens_to_generate=128,
+            temperature=0.5,
+            top_k=1,
+            top_p=0.9,
+            random_seed=0,
+            beam_search_diversity_rate=0.0,
+            beam_width=1,
+            repetition_penalty=1.0,
+            length_penalty=1.0,
 
-                )
-            else:
-                response = conn.generate(
-                    prompt=formatted_prompt,
-                    model="gpt-43b-002-lora",
-                    tokens_to_generate=128,
-                    temperature=0.5,
-                    top_k=1,
-                    top_p=0.9,
-                    random_seed=0,
-                    beam_search_diversity_rate=0.0,
-                    beam_width=1,
-                    repetition_penalty=1.0,
-                    length_penalty=1.0,
+        )
+    else:
+        response = conn.generate(
+            prompt=formatted_prompt,
+            model="gpt-43b-002-lora",
+            tokens_to_generate=128,
+            temperature=0.5,
+            top_k=1,
+            top_p=0.9,
+            random_seed=0,
+            beam_search_diversity_rate=0.0,
+            beam_width=1,
+            repetition_penalty=1.0,
+            length_penalty=1.0,
 
-                )
-            break
-        except:
-            # print("Retrying")
-            continue
+        )
     return response
 
 
