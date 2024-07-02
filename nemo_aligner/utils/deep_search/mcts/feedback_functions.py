@@ -202,7 +202,6 @@ class HarmfulnessFeedback(Feedback):
         # customization_id = os.environ.get("NGC_CUSTOMIZATION_ID")
         customization_id = ""
         self.conn = connect_llm_service(ngc_api_key=ngc_api_key, org_id=ngc_org_id)
-        self.run_inference = run_inference
         self.customization_id = customization_id
 
     def score(self, response, data_id=None):

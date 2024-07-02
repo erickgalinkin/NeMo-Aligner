@@ -31,15 +31,14 @@ def connect_llm_service(ngc_api_key, org_id):
     return conn
 
 
-def get_response_from_service(conn, formatted_prompt, customization_id=""):
+def get_response_from_service(conn, formatted_prompt, model_name="gpt-43b-002-lora", customization_id=""):
     """
     Send request to Nemo LLM service invoking the model to run inference and return the response
     """
-    # In case the service throws an error, we keep retying until we get a response
     if customization_id:
         response = conn.generate(
             prompt=formatted_prompt,
-            model="gpt-43b-002-lora",
+            model=model_name,
             customization_id=customization_id,
             tokens_to_generate=128,
             temperature=0.5,
@@ -55,7 +54,7 @@ def get_response_from_service(conn, formatted_prompt, customization_id=""):
     else:
         response = conn.generate(
             prompt=formatted_prompt,
-            model="gpt-43b-002-lora",
+            model=model_name,
             tokens_to_generate=128,
             temperature=0.5,
             top_k=1,
@@ -87,7 +86,7 @@ def run_inference(conn_obj, prompt, customization_id):
     assert conn_obj, "LLM Service Connection invalid"
 
     prompt = format_text_for_nemo_lora_toxic(prompt)
-    response = get_response_from_service(conn_obj, prompt, customization_id)
+    response = get_response_from_service(conn=conn_obj, formatted_prompt=prompt, customization_id=customization_id)
     pred = response["text"]
     if any([cat.lower() in pred.lower() for cat in UNSAFE_CATS]):
         return 1
