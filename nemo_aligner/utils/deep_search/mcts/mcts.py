@@ -212,11 +212,9 @@ class MCTSParallel:
         return text
 
     def get_value_and_terminated(self, text, data_id, depth, tokens):
-        print("Checking for termination")
         terminate = False
         for fun in self.terminate_fns:
             if fun(text, depth, tokens):
-                print("Terminate true")
                 terminate = True
                 break
 
@@ -358,6 +356,9 @@ class MCTSParallel:
                     text, spg.data_id, depth, all_tokens
                 )
 
+                print(f"value: {value}\n"
+                      f"is_terminal: {is_terminal}\n"
+                      f"ends_properly: {ends_properly}")
                 if is_terminal:
                     print("Is terminal")
                     if not self.args["oracle"]:
@@ -387,6 +388,7 @@ class MCTSParallel:
                         spg.value_memory.add((tuple(node.get_all_tokens()), value, node))
 
                 else:
+                    print("Not terminal")
                     # if not terminal, then expand the node in the later part of the code
                     # spg.node is a dictory
                     spg.node = {

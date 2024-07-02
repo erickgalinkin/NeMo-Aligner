@@ -101,6 +101,7 @@ def run_inference(conn_obj, prompt, customization_id):
 
     prompt = format_text_for_nemo_lora_toxic(prompt)
     response = get_response_from_service(conn_obj, prompt, customization_id)
+    print(f"Response from NGC: {response}")
     pred = response["text"]
     if any([cat.lower() in pred.lower() for cat in UNSAFE_CATS]):
         return 1
