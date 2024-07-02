@@ -590,6 +590,7 @@ class DeepSearch:
                 )
 
                 if is_terminal:
+                    print("Is terminal!")
                     if self.inference_only:
                         # if inference only, we only collect the best tokens from the inference
                         all_tokens = tuple(spg.state)
@@ -607,6 +608,7 @@ class DeepSearch:
                                 "context": self.mcts.decode_text(backup_root_states[i]),
                             }
                         )
+                        print("Appended to return memory")
                         # need to clean up the mcts cache starting from backup root states
                         backup_root_node = backup_root_nodes[i]
                         assert tuple(backup_root_states[i]) == tuple(backup_root_nodes[i].state)
@@ -621,6 +623,7 @@ class DeepSearch:
                     # collects the value buffer if the response ends properly with <extra_id> or byte token
                     # or if the response has the answer inside it
                     if ends_properly or has_answer:
+                        print("Ends properly!")
                         # only collect the memory if it ends properly
                         for tokens, hist_action_probs, actions in spg.memory:
                             hist_outcome = value
@@ -637,6 +640,7 @@ class DeepSearch:
                             )
 
                     # process the value memory to get the value for each of the tokens
+                    print("Processing value memory...")
                     value_mems = []
                     for tokens, value, node in spg.value_memory:
                         all_values = []
@@ -690,4 +694,5 @@ class DeepSearch:
                 print(f"### SAVING CACHE TOOK {save_end - save_beg} SECONDS")
                 self.save_flag = False
 
+        print("Returning...")
         return return_memory, return_value_memory
